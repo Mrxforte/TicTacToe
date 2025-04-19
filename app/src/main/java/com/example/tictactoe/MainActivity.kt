@@ -77,9 +77,8 @@ class MainActivity : AppCompatActivity() {
         if (!gameActive || boardState[row][col] != 0) {
             return
         }
-
         boardState[row][col] = currentPlayer
-        buttons[row][col].text = if (currentPlayer == 1) "X" else "O"
+        buttons[row][col].setBackgroundResource(if (currentPlayer == 1) R.drawable.x_button_game else R.drawable.zero_game_button)
         buttons[row][col].setTextColor(if (currentPlayer == 1) Color.BLUE else Color.RED)
 
         if (checkForWin()) {
@@ -160,7 +159,7 @@ class MainActivity : AppCompatActivity() {
         for (i in 0..2) {
             for (j in 0..2) {
                 buttons[i][j].text = ""
-                buttons[i][j].setBackgroundColor(Color.WHITE)
+                buttons[i][j].setBackgroundColor(Color.parseColor("#ECECEC"))
             }
         }
 

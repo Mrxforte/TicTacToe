@@ -4,4 +4,6 @@
     <string name="reset_game">Reset Game</string>
     <string name="exit">Exit</string>
     <string name="player_x_s_turn">Player X\'s Turn</string>
+    <string name="img">TODO</string>
+    <string name="who_is_playing_first">Who is playing first?</string>
 </resources>
