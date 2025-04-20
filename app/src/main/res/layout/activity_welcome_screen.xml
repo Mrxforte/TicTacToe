@@ -40,6 +40,7 @@
         app:layout_constraintTop_toBottomOf="@id/logo" />
 
     <ImageButton
+        android:id="@+id/xButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="30dp"
@@ -50,6 +51,7 @@
         app:layout_constraintLeft_toLeftOf="parent" />
 
     <ImageButton
+        android:id="@+id/zeroButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="30dp"

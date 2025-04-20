@@ -1,22 +1,15 @@
 package com.example.tictactoe
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
-import android.widget.Button
-import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import com.example.tictactoe.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var turnIndicator: TextView
-    private lateinit var resetButton: Button
-    private lateinit var exitButton: Button
-    private lateinit var buttons: Array<Array<Button>>
-
+    private lateinit var binding: ActivityMainBinding
     private var currentPlayer = 1 // 1 for X, 2 for O
     private var gameActive = true
     private var boardState = arrayOf(
@@ -39,37 +32,28 @@ class MainActivity : AppCompatActivity() {
         arrayOf(intArrayOf(0, 2), intArrayOf(1, 1), intArrayOf(2, 0))
     )
 
+    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        turnIndicator = findViewById(R.id.turnIndicator)
-        resetButton = findViewById(R.id.resetButton)
-        exitButton = findViewById(R.id.exitButton)
-
-        // Initialize buttons array
-        buttons = arrayOf(
-            arrayOf(findViewById(R.id.btn1), findViewById(R.id.btn2), findViewById(R.id.btn3)),
-            arrayOf(findViewById(R.id.btn4), findViewById(R.id.btn5), findViewById(R.id.btn6)),
-            arrayOf(findViewById(R.id.btn7), findViewById(R.id.btn8), findViewById(R.id.btn9))
-        )
+        // Get player selection from intent
+        currentPlayer = intent.getIntExtra("PLAYER_SELECTION", 1) // Default to X if not specified
 
         // Set click listeners for all buttons
-        for (i in 0..2) {
-            for (j in 0..2) {
-                buttons[i][j].setOnClickListener {
-                    onCellClicked(i, j)
-                }
-            }
-        }
+        binding.btn1.setOnClickListener { onCellClicked(0, 0) }
+        binding.btn2.setOnClickListener { onCellClicked(0, 1) }
+        binding.btn3.setOnClickListener { onCellClicked(0, 2) }
+        binding.btn4.setOnClickListener { onCellClicked(1, 0) }
+        binding.btn5.setOnClickListener { onCellClicked(1, 1) }
+        binding.btn6.setOnClickListener { onCellClicked(1, 2) }
+        binding.btn7.setOnClickListener { onCellClicked(2, 0) }
+        binding.btn8.setOnClickListener { onCellClicked(2, 1) }
+        binding.btn9.setOnClickListener { onCellClicked(2, 2) }
 
-        resetButton.setOnClickListener {
-            resetGame()
-        }
-
-        exitButton.setOnClickListener {
-            finish()
-        }
+        // Update the turn indicator based on the starting player
+        updateTurnIndicator()
     }
 
     @SuppressLint("SetTextI18n")
@@ -77,20 +61,35 @@ class MainActivity : AppCompatActivity() {
         if (!gameActive || boardState[row][col] != 0) {
             return
         }
+
+        val button = when {
+            row == 0 && col == 0 -> binding.btn1
+            row == 0 && col == 1 -> binding.btn2
+            row == 0 && col == 2 -> binding.btn3
+            row == 1 && col == 0 -> binding.btn4
+            row == 1 && col == 1 -> binding.btn5
+            row == 1 && col == 2 -> binding.btn6
+            row == 2 && col == 0 -> binding.btn7
+            row == 2 && col == 1 -> binding.btn8
+            else -> binding.btn9
+        }
+
         boardState[row][col] = currentPlayer
-        buttons[row][col].setBackgroundResource(if (currentPlayer == 1) R.drawable.x_button_game else R.drawable.zero_game_button)
-        buttons[row][col].setTextColor(if (currentPlayer == 1) Color.BLUE else Color.RED)
+        button.setBackgroundResource(if (currentPlayer == 1) R.drawable.x_button_game else R.drawable.zero_game_button)
+//        button.setTextColor(if (currentPlayer == 1) Color.BLUE else Color.RED)
 
         if (checkForWin()) {
             gameActive = false
             val winner = if (currentPlayer == 1) "X" else "O"
-            turnIndicator.text = "Player $winner wins!"
-            Toast.makeText(this, "Player $winner wins!", Toast.LENGTH_SHORT).show()
+            binding.turnIndicator.text = "Player $winner wins!"
+            var intent = Intent(this, WinnerScreen::class.java)
+            startActivity(intent)
             highlightWinningCells()
         } else if (isBoardFull()) {
             gameActive = false
-            turnIndicator.text = "Game ended in a draw!"
-            Toast.makeText(this, "Game ended in a draw!", Toast.LENGTH_SHORT).show()
+            var intent = Intent(this, DrawScreen::class.java)
+            startActivity(intent)
+            binding.turnIndicator.text = "Game ended in a draw!"
         } else {
             currentPlayer = if (currentPlayer == 1) 2 else 1
             updateTurnIndicator()
@@ -123,13 +122,24 @@ class MainActivity : AppCompatActivity() {
                 boardState[position1[0]][position1[1]] == boardState[position2[0]][position2[1]] &&
                 boardState[position1[0]][position1[1]] == boardState[position3[0]][position3[1]]
             ) {
-
-                buttons[position1[0]][position1[1]].setBackgroundColor(Color.GREEN)
-                buttons[position2[0]][position2[1]].setBackgroundColor(Color.GREEN)
-                buttons[position3[0]][position3[1]].setBackgroundColor(Color.GREEN)
+                getButton(position1[0], position1[1]).setBackgroundColor(Color.GREEN)
+                getButton(position2[0], position2[1]).setBackgroundColor(Color.GREEN)
+                getButton(position3[0], position3[1]).setBackgroundColor(Color.GREEN)
                 break
             }
         }
+    }
+
+    private fun getButton(row: Int, col: Int) = when {
+        row == 0 && col == 0 -> binding.btn1
+        row == 0 && col == 1 -> binding.btn2
+        row == 0 && col == 2 -> binding.btn3
+        row == 1 && col == 0 -> binding.btn4
+        row == 1 && col == 1 -> binding.btn5
+        row == 1 && col == 2 -> binding.btn6
+        row == 2 && col == 0 -> binding.btn7
+        row == 2 && col == 1 -> binding.btn8
+        else -> binding.btn9
     }
 
     private fun isBoardFull(): Boolean {
@@ -143,12 +153,16 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
+    @SuppressLint("SetTextI18n")
     private fun updateTurnIndicator() {
-        turnIndicator.text = if (currentPlayer == 1) "Player X's Turn" else "Player O's Turn"
+        binding.turnIndicator.text =
+            if (currentPlayer == 1) "Player X's Turn" else "Player O's Turn"
     }
 
+    @SuppressLint("SetTextI18n")
     private fun resetGame() {
-        currentPlayer = 1
+        currentPlayer =
+            intent.getIntExtra("PLAYER_SELECTION", 1) // Reset to original player selection
         gameActive = true
         boardState = arrayOf(
             intArrayOf(0, 0, 0),
@@ -156,12 +170,25 @@ class MainActivity : AppCompatActivity() {
             intArrayOf(0, 0, 0)
         )
 
-        for (i in 0..2) {
-            for (j in 0..2) {
-                buttons[i][j].text = ""
-                buttons[i][j].setBackgroundColor(Color.parseColor("#ECECEC"))
-            }
-        }
+        binding.btn1.text = ""
+        binding.btn2.text = ""
+        binding.btn3.text = ""
+        binding.btn4.text = ""
+        binding.btn5.text = ""
+        binding.btn6.text = ""
+        binding.btn7.text = ""
+        binding.btn8.text = ""
+        binding.btn9.text = ""
+
+        binding.btn1.setBackgroundColor(Color.parseColor("#ECECEC"))
+        binding.btn2.setBackgroundColor(Color.parseColor("#ECECEC"))
+        binding.btn3.setBackgroundColor(Color.parseColor("#ECECEC"))
+        binding.btn4.setBackgroundColor(Color.parseColor("#ECECEC"))
+        binding.btn5.setBackgroundColor(Color.parseColor("#ECECEC"))
+        binding.btn6.setBackgroundColor(Color.parseColor("#ECECEC"))
+        binding.btn7.setBackgroundColor(Color.parseColor("#ECECEC"))
+        binding.btn8.setBackgroundColor(Color.parseColor("#ECECEC"))
+        binding.btn9.setBackgroundColor(Color.parseColor("#ECECEC"))
 
         updateTurnIndicator()
     }
